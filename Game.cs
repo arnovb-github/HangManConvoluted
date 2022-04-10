@@ -1,7 +1,7 @@
 public class Game : IGame
 {
     private  IGameOptions _options;
-    // this is the word to guess, as char array
+    // this is the word to guess, as char array, because why not? They're faster...
     private char[] _answer = null!;
     private readonly char _placeHolder = '_';
     private char[] _guess = null!;
@@ -25,18 +25,20 @@ public class Game : IGame
             Console.WriteLine(e.Message);
             return;
         }
-        catch (Exception e)
+        catch (Exception e) // SelectRandomAnswer() may throw several exceptions
         {
             Console.WriteLine(e.Message);
             return;
         }
 
-        // main loop
         #region Actual game loop
         var numGuesses = _options.NumGuesses;
         while (numGuesses > 0)
         {
             Console.WriteLine($"You have {numGuesses} guesses left.");
+            Console.WriteLine($"{new string(_guess)}");
+            Console.WriteLine("Type a letter to guess");
+
             ConsoleKey key = Console.ReadKey(true).Key;
             if (key is ConsoleKey.Escape)
             {
@@ -61,13 +63,13 @@ public class Game : IGame
             StoreGuessedLetter(g);
             if (IsMatch(g))
             {
-                UpdateGuess(g, _guess); // inefficient
+                UpdateGuess(g, _guess); // we can argue over this all day. what is the best way to update the guess?
                 if (IsSolved())
                 {
                     Console.WriteLine($"You win! The answer was '{new string(_answer)}'.");
                     return;
                 }
-                Console.WriteLine(_guess);
+                continue;
             }
             numGuesses--;
         }
@@ -110,13 +112,13 @@ public class Game : IGame
 
     private string SelectAnswerFromTextFile()
     {
-        var tfwl = new TextFileWordList(_options);
+        var tfwl = new TextFileWordList(_options); // No DI for this yet.
         return tfwl.GetRandomAnswer();
     }
 
     private string SelectAnswerFromResource()
     {
-        var dwl = new EmbeddedWordList(_options);
+        var dwl = new EmbeddedWordList(_options); // No DI for this yet.
         return dwl.GetRandomAnswer();
     }
 
@@ -129,16 +131,17 @@ public class Game : IGame
     // should it take in guess as an argument and return it?
     // it is not needed since _guess lives outside the scope of the method,
     // but it 'feels' cleaner.
-    private char[] UpdateGuess(char c, char[] _guess)
+    // also perhaps we should make it more clear that _answer is by definition equal length to _guess?
+    private char[] UpdateGuess(char c, char[] guess)
     {
         for (int i = 0; i < _answer.Length; i++)
         {
             if (_answer[i] == c)
             {
-                _guess[i] = c;
+                guess[i] = c;
             }
         }
-        return _guess;
+        return guess;
     }
 
     // populate guess with placeholder characters
