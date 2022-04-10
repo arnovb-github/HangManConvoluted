@@ -100,7 +100,7 @@ public class Game : IGame
     }
     private string SelectRandomAnswer()
     {
-        if (string.IsNullOrEmpty(_options.FilePath)) // there was no filename specified
+        if (string.IsNullOrEmpty(_options.FilePath)) // there was no filename specified, use built-in list
         {
             return SelectAnswerFromResource();
         }
