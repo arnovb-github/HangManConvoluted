@@ -33,7 +33,7 @@ public class TextFileWordList : IWordList
                 yield return word;
             }
             // return all words except empty ones
-            if (_options.WordLength == 0 && !string.IsNullOrEmpty(word))
+            if (_options.WordLength == 0 && !string.IsNullOrWhiteSpace(word)) 
             {
                 yield return word;
             }
