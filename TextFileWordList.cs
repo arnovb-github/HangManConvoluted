@@ -28,12 +28,15 @@ public class TextFileWordList : IWordList
         {  
             var word = line.Trim().ToLower();
             // only return words of the specified length
-            if (_options.WordLength > 0 && word.Length == _options.WordLength && !string.IsNullOrWhiteSpace(word))
+            if (_options.WordLength > 0 
+                && word.Length == _options.WordLength 
+                && !string.IsNullOrWhiteSpace(word))
             {
                 yield return word;
             }
             // return all words except empty ones
-            if (_options.WordLength == 0 && !string.IsNullOrWhiteSpace(word)) 
+            if (_options.WordLength == 0 
+                && !string.IsNullOrWhiteSpace(word)) 
             {
                 yield return word;
             }

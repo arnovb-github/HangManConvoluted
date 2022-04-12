@@ -1,4 +1,4 @@
 public interface IGame
 {
-    void Run();
+    Task RunAsync();
 }

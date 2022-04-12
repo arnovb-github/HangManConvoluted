@@ -41,14 +41,14 @@ public class Application : IApplication
             fileOption
         };
         
-        rootCommand.SetHandler( (int i, int l, bool b, FileInfo f) =>
+        rootCommand.SetHandler( async (int i, int l, bool b, FileInfo f) =>
         {
             // apparently what we do here is to wire up a method that actually starts the progran
             _options.FilePath = f?.FullName;
             _options.NumGuesses = i;
             _options.EasyMode = b;
             _options.WordLength = l;
-            _game.Run(); // we can finally run the actual game!
+            await _game.RunAsync(); // we can finally run the actual game!
         }, numGuesses, wordLength, boolOption, fileOption);
 
         // the shebang line

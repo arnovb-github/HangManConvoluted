@@ -1,6 +1,8 @@
 public class Game : IGame
 {
     private  IGameOptions _options;
+
+    private IAnimation _animation;
     // this is the word to guess, as char array, because why not? They're faster...
     private char[] _answer = null!;
     private readonly char _placeHolder = '_';
@@ -8,37 +10,38 @@ public class Game : IGame
 
     private List<char> _guessedLetters = new List<char>();
 
-    public Game(IGameOptions options)
+    public Game(IGameOptions options, IAnimation animation)
     {
         _options = options;
+        _animation = animation;
     }
 
-    public void Run()
+    public async Task RunAsync()
     {
         try 
         {
             _answer = SelectRandomAnswer().ToCharArray();
             _guess = CreateGuess();
         }
-        catch (InvalidOperationException e)
+        // SelectRandomAnswer() may throw several exceptions
+        // we could catch them all separately, but I prefer to catch them all at once
+        catch (Exception ex)
         {
-            Console.WriteLine(e.Message);
-            return;
-        }
-        catch (Exception e) // SelectRandomAnswer() may throw several exceptions
-        {
-            Console.WriteLine(e.Message);
+            Console.WriteLine($"Error: {ex.Message}");
             return;
         }
 
         #region Actual game loop
-        var numGuesses = _options.NumGuesses;
-        while (numGuesses > 0)
+        uint guessCounter = 0;
+        string msg = string.Empty;
+        while (guessCounter < _options.NumGuesses)
         {
-            Console.WriteLine($"You have {numGuesses} guesses left.");
-            Console.WriteLine($"{new string(_guess)}");
+            Console.Clear();
+            Console.WriteLine(_animation.Frames[guessCounter]);
+            Console.WriteLine(msg);
+            Console.WriteLine($"{new string(_guess)} ({_options.NumGuesses - guessCounter} guesses left.)");
             Console.WriteLine("Type a letter to guess");
-
+            msg = string.Empty; // reset or it will be printed again
             ConsoleKey key = Console.ReadKey(true).Key;
             if (key is ConsoleKey.Escape)
             {
@@ -50,32 +53,49 @@ public class Game : IGame
             
             if (!IsValid(key))
             {
-                Console.WriteLine("Invalid guess.");
+                msg = "Invalid guess.";
                 continue;
             }
             var g = (char)(key - ConsoleKey.A + 'a'); // no idea why this works or what it even does. We get the correct character though.
             if (_options.EasyMode && _guessedLetters.Contains(g))
             {
-                Console.WriteLine("You already guessed that letter.");
+                msg = "You already guessed that letter.";
                 continue;
             }
 
             StoreGuessedLetter(g);
-            if (IsMatch(g))
+            if (!IsMatch(g)) // no match
+            {
+                msg = "No match.";
+            }
+            else
             {
                 UpdateGuess(g, _guess); // we can argue over this all day. what is the best way to update the guess?
                 if (IsSolved())
                 {
-                    Console.WriteLine($"You win! The answer was '{new string(_answer)}'.");
+                    Console.Clear();
+                    Console.WriteLine($"You win! The answer was '{new string(_answer)}' You took {guessCounter} attempts.");
                     return;
                 }
                 continue;
             }
-            numGuesses--;
+            guessCounter++;
         }
         #endregion
+        Console.Clear();
+        await PlayDeathAnimation();
         Console.WriteLine($"You lose! The answer was '{new string(_answer)}'. Better luck next time!");
         return;
+    }
+
+    private async Task PlayDeathAnimation()
+    {
+        for (int i = 0; i < _animation.DeathFrames.Length; i++)
+        {
+            Console.Clear();
+            Console.WriteLine(_animation.DeathFrames[i]);
+            await Task.Delay(TimeSpan.FromMilliseconds(150));
+        }
     }
 
     private void StoreGuessedLetter(char c)
