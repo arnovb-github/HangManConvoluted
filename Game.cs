@@ -83,7 +83,12 @@ public class Game : IGame
         }
         #endregion
         Console.Clear();
-        await PlayDeathAnimation();
+        // we introduce a method that also writes to the console,
+        // and on top of that introduces a delay!
+        // we use it method primarily as an excuse to bring in Async/Await, really.
+        // It has no real use in this project, but it nicely fits the need for having an
+        // essentially synchronous game be async.
+        await PlayDeathAnimation(); 
         Console.WriteLine($"You lose! The answer was '{new string(_answer)}'. Better luck next time!");
         return;
     }
