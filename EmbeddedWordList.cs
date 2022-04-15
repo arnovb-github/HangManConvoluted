@@ -24,7 +24,7 @@ public class EmbeddedWordList : IWordList
         }
         Random rnd = new Random();
         int index = rnd.Next(0, wordsToChooseFrom.Count);
-        return wordsToChooseFrom[index];
+        return wordsToChooseFrom[2];
     }
 
 
@@ -32,15 +32,7 @@ public class EmbeddedWordList : IWordList
     // The general format is [assembly name].[directory].[file name].
     // It is case-sensitive!
     const string wordsResource = "HangManConvoluted.wordlist.txt";
-    // we dont use a simple ReadAllLines because that's no fun
-    // we go overboard and use a yield return to return each line as it is read.
-    // it actually has its benefits, but it is really overkill.
-    // In cases where a length is specified, it has the benefit of not reading in all words.
-    // and then filter them afterwards. Not sure where the yield comes in though.
-    // I am guessing it has to do with not having to create two lists? I have no idea.
-    // it builds my list for me in an easy way
-    // 'Add the things to an IEnumerable, I'll deal with them when you're done'.
-    // I dunno, I just like it I suppose.
+    // also, let's make things overly complicated by yielding an IAsyncEnumerable.
     public async IAsyncEnumerable<string> GetWordsFromResourceAsync()
     {
         var assembly = Assembly.GetExecutingAssembly();
@@ -54,14 +46,17 @@ public class EmbeddedWordList : IWordList
         while (!streamReader.EndOfStream)
         {
             string? word = await streamReader.ReadLineAsync();
-            if (_options.WordLength > 0 && word?.Length == _options.WordLength && !string.IsNullOrWhiteSpace(word))
+            if (_options.WordLength > 0 
+                && !string.IsNullOrWhiteSpace(word)
+                && word.Length == _options.WordLength)
             {
-                yield return word;
+                yield return word.Trim().ToLower();
             }
             // return all words except empty ones
-            if (_options.WordLength == 0 && !string.IsNullOrEmpty(word) && !string.IsNullOrWhiteSpace(word))
+            if (_options.WordLength == 0 
+                && !string.IsNullOrWhiteSpace(word))
             {
-                yield return word;
+                yield return word.Trim().ToLower();
             }
         }
     }
