@@ -20,7 +20,7 @@ public class Game : IGame
     {
         try 
         {
-            _answer = SelectRandomAnswer().ToCharArray();
+            _answer = await SelectRandomAnswer();
             _guess = CreateGuess();
         }
         // SelectRandomAnswer() may throw several exceptions
@@ -123,28 +123,28 @@ public class Game : IGame
     {
         return ck >= ConsoleKey.A && ck <= ConsoleKey.Z;
     }
-    private string SelectRandomAnswer()
+    private async Task<char[]> SelectRandomAnswer()
     {
         if (string.IsNullOrEmpty(_options.FilePath)) // there was no filename specified, use built-in list
         {
-            return SelectAnswerFromResource();
+            return (await SelectAnswerFromResource()).ToCharArray();
         }
         else
         {
-            return SelectAnswerFromTextFile();
+            return (await SelectAnswerFromTextFile()).ToCharArray();
         }
     }
 
-    private string SelectAnswerFromTextFile()
+    private async Task<string> SelectAnswerFromTextFile()
     {
         var tfwl = new TextFileWordList(_options); // No DI for this yet.
-        return tfwl.GetRandomAnswer();
+        return await tfwl.GetRandomAnswerAsync();
     }
 
-    private string SelectAnswerFromResource()
+    private async Task<string> SelectAnswerFromResource()
     {
-        var dwl = new EmbeddedWordList(_options); // No DI for this yet.
-        return dwl.GetRandomAnswer();
+        var ewl = new EmbeddedWordList(_options); // No DI for this yet.
+        return await ewl.GetRandomAnswerAsync();
     }
 
     private bool IsMatch(char c)

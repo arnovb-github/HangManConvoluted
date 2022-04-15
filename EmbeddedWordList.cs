@@ -7,10 +7,17 @@ public class EmbeddedWordList : IWordList
     {
         _options = options;
     }
-    public string GetRandomAnswer()
+
+    // It is utterly pointless to use async and IAsyncEnumerable here, 
+    // because all we do is build up a list that has to be complete anyway.  
+    // But it is an example of how to use them.
+    public async Task<string> GetRandomAnswerAsync()
     {
-        List<string> wordsToChooseFrom = GetWordsFromResource().ToList();
-        
+        var wordsToChooseFrom = new List<string>();
+        await foreach(var word in GetWordsFromResourceAsync())
+        {
+            wordsToChooseFrom.Add(word);
+        }
         if (wordsToChooseFrom.Count() == 0)
         {
             throw new InvalidOperationException("No words of the specified length found in the wordlist");
@@ -34,9 +41,9 @@ public class EmbeddedWordList : IWordList
     // it builds my list for me in an easy way
     // 'Add the things to an IEnumerable, I'll deal with them when you're done'.
     // I dunno, I just like it I suppose.
-    public IEnumerable<string> GetWordsFromResource()
+    public async IAsyncEnumerable<string> GetWordsFromResourceAsync()
     {
-        Assembly assembly = Assembly.GetExecutingAssembly();
+        var assembly = Assembly.GetExecutingAssembly();
         using Stream? stream = assembly.GetManifestResourceStream(wordsResource);
         if (stream is null)
         {
@@ -46,7 +53,7 @@ public class EmbeddedWordList : IWordList
         using StreamReader streamReader = new(stream);
         while (!streamReader.EndOfStream)
         {
-            string? word = streamReader.ReadLine();
+            string? word = await streamReader.ReadLineAsync();
             if (_options.WordLength > 0 && word?.Length == _options.WordLength && !string.IsNullOrWhiteSpace(word))
             {
                 yield return word;

@@ -1,4 +1,4 @@
 public interface IWordList
 {
-    string GetRandomAnswer();
+    Task<string> GetRandomAnswerAsync();
 }
