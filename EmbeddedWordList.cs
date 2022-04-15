@@ -24,7 +24,7 @@ public class EmbeddedWordList : IWordList
         }
         Random rnd = new Random();
         int index = rnd.Next(0, wordsToChooseFrom.Count);
-        return wordsToChooseFrom[2];
+        return wordsToChooseFrom[index];
     }
 
 
