@@ -16,15 +16,26 @@ public class Game : IGame
         _animation = animation;
     }
 
+    // RunAsync is the entry point for the game.
+    // There is no point in having it be a Task,
+    // because it is a turn-based game that cannot start after anything
+    // that could be considered async has finished.
+    // Thast async stuff is total overkill,
+    // All it does is create a list of words asynchronously(!),
+    // then pick a single random one from that list.
+    // There is absolutely no need for any of this to be async.
+    // What is does illustrate is that once there's async somewhere in the code,
+    // it spreads all over the place.
     public async Task RunAsync()
     {
         try 
         {
-            _answer = await SelectRandomAnswer();
+            _answer = await SelectRandomAnswerAsync();
             _guess = CreateGuess();
         }
-        // SelectRandomAnswer() may throw several exceptions
-        // we could catch them all separately, but I prefer to catch them all at once
+        // SelectRandomAnswerAsync() may throw several exceptions
+        // we could catch them all separately, but I prefer to catch them all at once,
+        // all we do is display the error message anyway.
         catch (Exception ex)
         {
             Console.WriteLine($"Error: {ex.Message}");
@@ -74,7 +85,7 @@ public class Game : IGame
                 if (IsSolved())
                 {
                     Console.Clear();
-                    Console.WriteLine($"You win! The answer was '{new string(_answer)}' You took {guessCounter} attempts.");
+                    Console.WriteLine($"You won in {guessCounter + 1} attempts.");
                     return;
                 }
                 continue;
@@ -123,7 +134,7 @@ public class Game : IGame
     {
         return ck >= ConsoleKey.A && ck <= ConsoleKey.Z;
     }
-    private async Task<char[]> SelectRandomAnswer()
+    private async Task<char[]> SelectRandomAnswerAsync()
     {
         if (string.IsNullOrEmpty(_options.FilePath)) // there was no filename specified, use built-in list
         {
