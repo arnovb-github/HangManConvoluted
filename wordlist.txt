@@ -1,5 +1,5 @@
 hangman
 galgje
 
-belachelijk
+ belachelijk
 voorbeeld
