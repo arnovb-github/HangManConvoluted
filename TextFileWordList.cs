@@ -28,6 +28,7 @@ public class TextFileWordList : IWordList
 
     // let's go overboard and do yield instead of a simple one-liner
     // theoretically, this should improve performance with very large files
+    // also, throw in IAsyncEnumerable just for fun
     private async IAsyncEnumerable<string> GetWordsFromTextFileAsync()
     {
         // may throw several exceptions, see https://docs.microsoft.com/en-us/dotnet/api/system.io.file.readlines?view=net-6.0
@@ -49,5 +50,4 @@ public class TextFileWordList : IWordList
             }
         }  
     }
-
 }

@@ -51,9 +51,7 @@ public class Application : IApplication
             await _game.RunAsync(); // we can finally run the actual game!
         }, numGuesses, wordLength, boolOption, fileOption);
 
-        // the shebang line
-        // InvokeAsync has no benefit whatsoever over Invoke here, the method called is synchronous anyway.
-        // It is just there to make things convoluted. :->
+        // Invoke root command, i.e., start the program!
         await rootCommand.InvokeAsync(args); // this invokes the method in the SetHandler method.
     }
 }
